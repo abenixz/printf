@@ -1,24 +1,3 @@
-#ifndef _GLOBAL_DEFINITIONS_H
-#define _GLOBAL_DEFINITIONS_H
-
-/* #include "global_definitions.h" */
-
-#endif
-
-#ifndef STDLIB_H
-#define STDLIB_H
-
-#include <stdlib.h>
-
-#endif
-
-#ifndef STDARG_H
-#define STDARG_H
-
-#include <stdarg.h>
-
-#endif
-
 #ifndef _HOLBERTON_H
 #define _HOLBERTON_H
 
@@ -64,19 +43,11 @@ void append_num(buffer *buf, unsigned int num);
 
 int write_bin(buffer *buf, va_list v_ls);
 
-/* Martin Above / Samie Below */
-
 int _printf(const char *format, ...);
-
 int opid(buffer *buf, va_list v_ls, const char *src, int src_i);
-
 int write_char(buffer *buf, va_list v_ls);
-
 int write_str(buffer *buf, va_list v_ls);
-
 int write_mod(buffer *buf, va_list v_ls);
-
 int write_int(buffer *buf, va_list v_ls);
-
 char *itoc(int num, char *dest);
 #endif
