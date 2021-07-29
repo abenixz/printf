@@ -2,81 +2,44 @@
 #include <stdlib.h>
 
 /**
- * check_for_specifiers - checks if there is a valid format specifier
- * @format: possible format specifier
- *
- * Return: pointer to valid function or NULL
- */
-static int (*check_for_specifiers(const char *format))(va_list)
-{
-	unsigned int i;
-	print_t p[] = {
-		{"c", print_c},
-		{"s", print_s},
-		{"i", print_i},
-		{"d", print_d},
-		{"u", print_u},
-		{"b", print_b},
-		{"o", print_o},
-		{"x", print_x},
-		{"X", print_X},
-		{"p", print_p},
-		{"S", print_S},
-		{"r", print_r},
-		{"R", print_R},
-		{NULL, NULL}
-	};
-
-	for (i = 0; p[i].t != NULL; i++)
-	{
-		if (*(p[i].t) == *format)
-		{
-			break;
-		}
-	}
-	return (p[i].f);
-}
-
-/**
- * _printf - prints anything
- * @format: list of argument types passed to the function
- *
- * Return: number of characters printed
+ * _printf - prints any string with certain flags for modification
+ * @format: the string of characters to write to buffer
+ * Return: an integer that counts how many writes to the buffer were made
  */
 int _printf(const char *format, ...)
 {
-	unsigned int i = 0, count = 0;
-	va_list valist;
-	int (*f)(va_list);
+	int i = 0, var = 0;
+	va_list v_ls;
+	buffer *buf;
 
+	buf = buf_new();
+	if (buf == NULL)
+		return (-1);
 	if (format == NULL)
 		return (-1);
-	va_start(valist, format);
+	va_start(v_ls, format);
 	while (format[i])
 	{
-		for (; format[i] != '%' && format[i]; i++)
+		buf_wr(buf);
+		if (format[i] == '%')
 		{
-			_putchar(format[i]);
-			count++;
-		}
-		if (!format[i])
-			return (count);
-		f = check_for_specifiers(&format[i + 1]);
-		if (f != NULL)
-		{
-			count += f(valist);
-			i += 2;
+			var = opid(buf, v_ls, format, i);
+			if (var < 0)
+			{
+				i = var;
+				break;
+			}
+			i += var;
 			continue;
 		}
-		if (!format[i + 1])
-			return (-1);
-		_putchar(format[i]);
-		count++;
-		if (format[i + 1] == '%')
-			i += 2;
-		else
-			i++;
+		buf->str[buf->index] = format[i];
+		buf_inc(buf);
+		i++;
 	}
-	va_end(valist);
-	return (count);
+	buf_write(buf);
+	if (var >= 0)
+		i = buf->overflow;
+	buf_end(buf);
+	va_end(v_ls);
+	return (i);
 }
