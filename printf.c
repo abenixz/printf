@@ -1,45 +1,37 @@
 #include "holberton.h"
-#include <stdlib.h>
 
 /**
- * _printf - prints any string with certain flags for modification
- * @format: the string of characters to write to buffer
- * Return: an integer that counts how many writes to the buffer were made
+ * _printf - Receives the main string and all the necessary parameters to
+ * print a formated string
+ * @format: A string containing all the desired characters
+ * Return: A total count of the characters printed
  */
 int _printf(const char *format, ...)
 {
-	int i = 0, var = 0;
-	va_list v_ls;
-	buffer *buf;
+	int printed_chars;
+	conver_t f_list[] = {
+		{"c", print_char},
+		{"s", print_string},
+		{"%", print_percent},
+		{"d", print_integer},
+		{"i", print_integer},
+		{"b", print_binary},
+		{"r", print_reversed},
+		{"R", rot13},
+		{"u", unsigned_integer},
+		{"o", print_octal},
+		{"x", print_hex},
+		{"X", print_heX},
+		{NULL, NULL}
+	};
+	va_list arg_list;
 
-	buf = buf_new();
-	if (buf == NULL)
-		return (-1);
 	if (format == NULL)
 		return (-1);
-	va_start(v_ls, format);
-	while (format[i])
-	{
-		buf_wr(buf);
-		if (format[i] == '%')
-		{
-			var = opid(buf, v_ls, format, i);
-			if (var < 0)
-			{
-				i = var;
-				break;
-			}
-			i += var;
-			continue;
-		}
-		buf->str[buf->index] = format[i];
-		buf_inc(buf);
-		i++;
-	}
-	buf_write(buf);
-	if (var >= 0)
-		i = buf->overflow;
-	buf_end(buf);
-	va_end(v_ls);
-	return (i);
+
+	va_start(arg_list, format);
+	/*Calling parser function*/
+	printed_chars = parser(format, f_list, arg_list);
+	va_end(arg_list);
+	return (printed_chars);
 }
