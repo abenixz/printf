@@ -1,87 +1,45 @@
 #include "holberton.h"
-#include <stdio.h>
-#include <stdarg.h>
-#include <limits.h>
-#include <unistd.h>
-/**
- * _printf - Modified Printf function that produces output with format.
- * @format: references to the desired format to be Printed.
- * Return: length of string.
- */
+#include <stdlib.h>
 
+/**
+ * _printf - prints any string with certain flags for modification
+ * @format: the string of characters to write to buffer
+ * Return: an integer that counts how many writes to the buffer were made
+ */
 int _printf(const char *format, ...)
-{	va_list args;
-	int count = 0;
+{
+	int i = 0, var = 0;
+	va_list v_ls;
+	buffer *buf;
 
-	va_start(args, format);
-	if (!format || (format[0] == '%' && format[1] == '\0'))
+	buf = buf_new();
+	if (buf == NULL)
 		return (-1);
-	while (*format != '\0')
+	if (format == NULL)
+		return (-1);
+	va_start(v_ls, format);
+	while (format[i])
 	{
-		if (*format == '%')
-		{format++;
-			if (*(format) == '!')
-			{char ex = '!';
-				char p = '%';
-
-				print_char(&p, &count), print_char(&ex, &count);
-				format++; }
-			if (*(format) == ' ' || *(format) == '#')
+		buf_wr(buf);
+		if (format[i] == '%')
+		{
+			var = opid(buf, v_ls, format, i);
+			if (var < 0)
 			{
-				while (*format == ' ' || '#')
-					format++; }
-			if (*(format) == '%' || *(format) == 'z')
-			{char c = '%';
-
-				print_char(&c, &count), format++;
+				i = var;
+				break;
 			}
-			else if (*(format) == 'c')
-			{char st = (char)va_arg(args, int);
-
-				print_char(&st, &count), format++;
-			}
-			else if (*(format) == 's')
-			{char *string;
-				string = va_arg(args, char *);
-
-				print_string(string, &count), format++;
-			}
+			i += var;
+			continue;
 		}
-		else
-		print_char(format, &count), ++format; }
-	va_end(args);
-	return (count);
-}
-/**
- * print_string - func that prints a string.
- * @string: declaration of string pointer with a value to be printed.
- * @counter: an int counter for the string.
- * Return: no value.
- */
-void print_string(char *string, int *counter)
-{
-	int strcount = 0;
-	int i = 0;
-
-	if (string == NULL)
-	{
-		string = "(null)";
+		buf->str[buf->index] = format[i];
+		buf_inc(buf);
+		i++;
 	}
-	for (i = 0; string[i] != '\0'; i++)
-	{
-		print_char((string + i), &strcount);
-	}
-	*counter = *counter + strcount;
-
-}
-/**
- * print_char - func that prints a character.
- * @ch: the character to be printed.
- * @inc1: a value to be incremented for formatting.
- * Return: no value.
- */
-int print_char(const char *ch, int *inc1)
-{
-	*inc1 = *inc1 + 1;
-	return (write(1, ch, 1));
+	buf_write(buf);
+	if (var >= 0)
+		i = buf->overflow;
+	buf_end(buf);
+	va_end(v_ls);
+	return (i);
 }
