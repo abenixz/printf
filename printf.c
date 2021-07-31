@@ -1,45 +1,50 @@
 #include "holberton.h"
-#include <stdlib.h>
 
 /**
- * _printf - prints any string with certain flags for modification
- * @format: the string of characters to write to buffer
- * Return: an integer that counts how many writes to the buffer were made
+ * _printf - a function that produces output according to a format
+ *
+ * @format: a pointer to the format string
+ *
+ * Return: on success, returns the number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	int i = 0, var = 0;
-	va_list v_ls;
-	buffer *buf;
+	int sum = 0;
+	va_list ap;
+	char *p, *start;
+	params_t params = PARAMS_INIT;
 
-	buf = buf_new();
-	if (buf == NULL)
+	va_start(ap, format);
+
+	if (!format || (format[0] == '%' && !format[1]))
 		return (-1);
-	if (format == NULL)
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
 		return (-1);
-	va_start(v_ls, format);
-	while (format[i])
+	for (p = (char *)format; *p; p++)
 	{
-		buf_wr(buf);
-		if (format[i] == '%')
+		init_params(&params, ap);
+		if (*p != '%')
 		{
-			var = opid(buf, v_ls, format, i);
-			if (var < 0)
-			{
-				i = var;
-				break;
-			}
-			i += var;
+			sum += _putchar(*p);
 			continue;
 		}
-		buf->str[buf->index] = format[i];
-		buf_inc(buf);
-		i++;
+		start = p;
+		p++;
+		while (get_flag(p, &params)) /* while char at p is flag char */
+		{
+			p++; /* next char */
+		}
+		p = get_width(p, &params, ap);
+		p = get_precision(p, &params, ap);
+		if (get_modifier(p, &params))
+			p++;
+		if (!get_specifier(p))
+			sum += print_from_to(start, p,
+					params.l_modifier || params.h_modifier ? p - 1 : 0);
+		else
+			sum += get_print_func(p, ap, &params);
 	}
-	buf_write(buf);
-	if (var >= 0)
-		i = buf->overflow;
-	buf_end(buf);
-	va_end(v_ls);
-	return (i);
+	_putchar(BUF_FLUSH);
+	va_end(ap);
+	return (sum);
 }

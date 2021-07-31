@@ -1,82 +1,119 @@
-#ifndef _GLOBAL_DEFINITIONS_H
-#define _GLOBAL_DEFINITIONS_H
-
-/* #include "global_definitions.h" */
-
-#endif
-
-#ifndef STDLIB_H
-#define STDLIB_H
-
-#include <stdlib.h>
-
-#endif
-
-#ifndef STDARG_H
-#define STDARG_H
+#ifndef _PRINTF_H
+#define _PRINTF_H
 
 #include <stdarg.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
 
-#endif
+#define OUTPUT_BUF_SIZE 1024
+#define BUF_FLUSH -1
 
-#ifndef _HOLBERTON_H
-#define _HOLBERTON_H
+#define FIELD_BUF_SIZE 50
 
-/**
- * struct print_buffer - structer for the write buffer.
- * @index: current index of the buffer.
- * @size: size of the buffer.
- * @overflow: this recoreds the overflow.
- * @str: pointer to memory that contains the content for this buffer.
- */
-typedef struct print_buffer
-{
-	size_t index;
-	size_t size;
-	size_t overflow;
-	char *str;
-} buffer;
+#define NULL_STRING "(null)"
 
-buffer *buf_new();
-buffer *buf_custom(size_t);
-size_t buf_size(buffer *);
-size_t buf_index(buffer *);
-char *buf_content(buffer *);
-void buf_write(buffer *);
-void buf_end(buffer *);
-void buf_wr(buffer *);
-void buf_inc(buffer *);
+#define PARAMS_INIT {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+#define CONVERT_LOWERCASE	1
+#define CONVERT_UNSIGNED	2
 
 /**
- * struct print_ops - struct for the write operators.
- * @op: hold a symbol that represents the operator.
- * @fn: pointer function to the write functions.
+ * struct parameters - parameters struct
+ *
+ * @unsign: flag if unsigned value
+ *
+ * @plus_flag: on if plus_flag specified
+ * @space_flag: on if hashtag_flag specified
+ * @hashtag_flag: on if _flag specified
+ * @zero_flag: on if _flag specified
+ * @minus_flag: on if _flag specified
+ *
+ * @width: field width specified
+ * @precision: field precision specified
+ *
+ * @h_modifier: on if h_modifier is specified
+ * @l_modifier: on if l_modifier is specifies
+ *
  */
-typedef struct print_ops
+typedef struct parameters
 {
-	char *op;
-	int (*fn)(buffer *, va_list);
-} prtOp;
+	unsigned int unsign			: 1;
 
-prtOp *prtOp_init();
+	unsigned int plus_flag		: 1;
+	unsigned int space_flag		: 1;
+	unsigned int hashtag_flag	: 1;
+	unsigned int zero_flag		: 1;
+	unsigned int minus_flag		: 1;
 
-void append_num(buffer *buf, unsigned int num);
+	unsigned int width;
+	unsigned int precision;
 
-int write_bin(buffer *buf, va_list v_ls);
+	unsigned int h_modifier		: 1;
+	unsigned int l_modifier		: 1;
+} params_t;
 
-/* Martin Above / Samie Below */
+/**
+ * struct specifier - Struct token
+ *
+ * @specifier: format token
+ * @f: The function associated
+ */
+typedef struct specifier
+{
+	char *specifier;
+	int (*f)(va_list, params_t *);
+} specifier_t;
 
+/* _put.c module */
+int _puts(char *str);
+int _putchar(int c);
+
+/* print_functions.c module */
+int print_char(va_list ap, params_t *params);
+int print_int(va_list ap, params_t *params);
+int print_string(va_list ap, params_t *params);
+int print_percent(va_list ap, params_t *params);
+int print_S(va_list ap, params_t *params);
+
+/* number.c module */
+char *convert(long int num, int base, int flags, params_t *params);
+int print_unsigned(va_list ap, params_t *params);
+int print_address(va_list ap, params_t *params);
+
+/* specifier.c module */
+int (*get_specifier(char *s))(va_list ap, params_t *params);
+int get_print_func(char *s, va_list ap, params_t *params);
+int get_flag(char *s, params_t *params);
+int get_modifier(char *s, params_t *params);
+char *get_width(char *s, params_t *params, va_list ap);
+
+/* convert_number.c module */
+int print_hex(va_list ap, params_t *params);
+int print_HEX(va_list ap, params_t *params);
+int print_binary(va_list ap, params_t *params);
+int print_octal(va_list ap, params_t *params);
+
+/* simple_printers.c module */
+int print_from_to(char *start, char *stop, char *except);
+int print_rev(va_list ap, params_t *params);
+int print_rot13(va_list ap, params_t *params);
+
+/* print_number.c module */
+int _isdigit(int c);
+int _strlen(char *s);
+int print_number(char *str, params_t *params);
+int print_number_right_shift(char *str, params_t *params);
+int print_number_left_shift(char *str, params_t *params);
+
+/* params.c module */
+void init_params(params_t *params, va_list ap);
+
+/* string_fields.c modoule */
+char *get_precision(char *p, params_t *params, va_list ap);
+
+/* _prinf.c module */
 int _printf(const char *format, ...);
 
-int opid(buffer *buf, va_list v_ls, const char *src, int src_i);
-
-int write_char(buffer *buf, va_list v_ls);
-
-int write_str(buffer *buf, va_list v_ls);
-
-int write_mod(buffer *buf, va_list v_ls);
-
-int write_int(buffer *buf, va_list v_ls);
-
-char *itoc(int num, char *dest);
-#endif
+#endif /* _PRINTF_H */
