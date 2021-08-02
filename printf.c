@@ -1,50 +1,92 @@
 #include "holberton.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
- * _printf - a function that produces output according to a format
- *
- * @format: a pointer to the format string
- *
- * Return: on success, returns the number of characters printed
+ * printSpecials - prints special characters
+ * @next: character after the %
+ * @arg: argument for the indentifier
+ * Return: the number of characters printed
+ * (excluding the null byte used to end output to strings)
  */
+
+int printSpecials(char next, va_list arg)
+{
+	int functsIndex;
+
+	specialsStruct functs[] = {
+		{"c", print_char},
+		{"s", print_str},
+		{"d", print_int},
+		{"i", print_int},
+		{"u", print_unsigned},
+		{"b", print_unsignedToBinary},
+		{"o", print_oct},
+		{"x", print_hex},
+		{"X", print_HEX},
+		{"S", print_STR},
+		{NULL, NULL}
+	};
+
+	for (functsIndex = 0; functs[functsIndex].indentifier != NULL; functsIndex++)
+	{
+		if (functs[functsIndex].indentifier[0] == next)
+			return (functs[functsIndex].printer(arg));
+	}
+	return (0);
+}
+
+/**
+ * _printf - mimic printf from stdio
+ * Description: produces output according to a format
+ * write output to stdout, the standard output stream
+ * @format: character string composed of zero or more directives
+ *
+ * Return: the number of characters printed
+ * (excluding the null byte used to end output to strings)
+ * return -1 for incomplete specials error
+ */
+
 int _printf(const char *format, ...)
 {
-	int sum = 0;
-	va_list ap;
-	char *p, *start;
-	params_t params = PARAMS_INIT;
+	unsigned int i;
+	int specialsPrinted = 0, charPrinted = 0;
+	va_list arg;
 
-	va_start(ap, format);
+	va_start(arg, format);
+	if (format == NULL)
+		return (-1);
 
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	for (p = (char *)format; *p; p++)
+	for (i = 0; format[i] != '\0'; i++)
 	{
-		init_params(&params, ap);
-		if (*p != '%')
+		if (format[i] != '%')
 		{
-			sum += _putchar(*p);
+			_putchar(format[i]);
+			charPrinted++;
 			continue;
 		}
-		start = p;
-		p++;
-		while (get_flag(p, &params)) /* while char at p is flag char */
+		if (format[i + 1] == '%')
 		{
-			p++; /* next char */
+			_putchar('%');
+			charPrinted++;
+			i++;
+			continue;
 		}
-		p = get_width(p, &params, ap);
-		p = get_precision(p, &params, ap);
-		if (get_modifier(p, &params))
-			p++;
-		if (!get_specifier(p))
-			sum += print_from_to(start, p,
-					params.l_modifier || params.h_modifier ? p - 1 : 0);
-		else
-			sum += get_print_func(p, ap, &params);
+		if (format[i + 1] == '\0')
+			return (-1);
+
+		specialsPrinted = printSpecials(format[i + 1], arg);
+		if (specialsPrinted == -1 || specialsPrinted != 0)
+			i++;
+		if (specialsPrinted > 0)
+			charPrinted += specialsPrinted;
+
+		if (specialsPrinted == 0)
+		{
+			_putchar('%');
+			charPrinted++;
+		}
 	}
-	_putchar(BUF_FLUSH);
-	va_end(ap);
-	return (sum);
+	va_end(arg);
+	return (charPrinted);
 }
