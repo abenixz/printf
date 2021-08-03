@@ -1,32 +1,43 @@
-#ifndef __HOLBERTON_H__
-#define __HOLBERTON_H__
+#ifndef HOLBERTON_H
+#define HOLBERTON_H
 
+#include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
 
 /**
- * struct printer - format printer struct
- * @spec: the format specifier
- * @fn: the function that handles @spec
+ * struct _print_func - map a print function to a conversion specifier
+ * @specifier: the conversion specifier
+ * @f: the function to call to format and print output
  */
-
-typedef struct printer
+typedef struct _print_func
 {
-	char *spec;
-	int (*fn)(va_list);
-} print_t;
+	char specifier;
+	int (*f)(va_list);
+} print_func;
 
 int _putchar(char c);
 int _printf(const char *format, ...);
-int print_char(va_list ap);
-int print_string(va_list ap);
-int print_space(va_list ap);
-int print_int(va_list ap);
-int print_unsigned(va_list ap);
-int print_octal(va_list ap);
-int print_digit(int num, int *count);
-int print_unsigned_digit(unsigned int num, int *count);
-int print_digit_octal(unsigned int num, int *count);
-int call_print_fn(char ch, va_list ap);
+int print_c(va_list);
+int print_s(va_list);
+int print_d(va_list);
+int print_x(va_list);
+void _print_x(unsigned int n, int *count);
+int print_X(va_list);
+void _print_X(unsigned int n, int *count);
+int print_o(va_list);
+void _print_o(unsigned int n, int *count);
+int print_u(va_list);
+void _print_u(unsigned int n, int *count);
+void _print_d(int n, int *count);
+int print_percent(va_list);
+int (*get_print_any_func(char c))(va_list);
+int print_b(va_list);
+void _print_b(unsigned int n, int *count);
+int print_p(va_list);
+void _print_p(unsigned long int n, int *count);
+int print_S(va_list);
+int print_rev(va_list);
+void _print_rev(char *s, int *count);
 
-#endif /* __HOLBERTON_H__ */
+
+#endif /* HOLBERTON_H */
