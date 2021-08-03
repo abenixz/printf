@@ -1,47 +1,50 @@
 #include "holberton.h"
 
 /**
- * _printf - print arguments according to a format
- * @format: a string composed of ordinary characters and format specifications
+ * _printf - a function that produces output according to a format
  *
- * Return: Upon success, this returns the number of characters printed.
- * If an output error is encountered, -1 is returned instead.
+ * @format: a pointer to the format string
+ *
+ * Return: on success, returns the number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	va_list args;
-	int (*print_func)(va_list);
-	int char_count, last_ret_val;
+	int sum = 0;
+	va_list ap;
+	char *p, *start;
+	params_t params = PARAMS_INIT;
 
-	if (!format)
+	va_start(ap, format);
+
+	if (!format || (format[0] == '%' && !format[1]))
 		return (-1);
-	va_start(args, format);
-	for (char_count = 0; *format; ++format)
+	if (format[0] == '%' && format[1] == ' ' && !format[2])
+		return (-1);
+	for (p = (char *)format; *p; p++)
 	{
-		if (*format == '%')
+		init_params(&params, ap);
+		if (*p != '%')
 		{
-			if (!format[1])
-				return (-1);
-			print_func = get_print_any_func(format[1]);
-			if (print_func)
-			{
-				last_ret_val = print_func(args);
-				if (last_ret_val < 0)
-					return (-1);
-				char_count += last_ret_val;
-				++format;
-				continue;
-			}
-			last_ret_val = _putchar(*format++);
-			if (last_ret_val < 0)
-				return (-1);
-			char_count += last_ret_val;
+			sum += _putchar(*p);
+			continue;
 		}
-		last_ret_val = _putchar(*format);
-		if (last_ret_val < 0)
-			return (-1);
-		char_count += last_ret_val;
+		start = p;
+		p++;
+		while (get_flag(p, &params)) /* while char at p is flag char */
+		{
+			p++; /* next char */
+		}
+		p = get_width(p, &params, ap);
+		p = get_precision(p, &params, ap);
+		if (get_modifier(p, &params))
+			p++;
+		if (!get_specifier(p))
+			sum += print_from_to(start, p,
+					params.l_modifier || params.h_modifier ? p - 1 : 0);
+		else
+			sum += get_print_func(p, ap, &params);
 	}
-	va_end(args);
-	return (char_count);
+	_putchar(BUF_FLUSH);
+	va_end(ap);
+	return (sum);
 }
